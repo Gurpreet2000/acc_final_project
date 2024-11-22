@@ -14,7 +14,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class GoogleDrive {
-        public static void main(String[] args) throws InterruptedException, IOException {
+        public void init() throws IOException {
                 // Create a new instance of the ChromeDriver, which will control Chrome
                 WebDriver driver = new ChromeDriver();
 
@@ -83,15 +83,17 @@ public class GoogleDrive {
                         List<WebElement> tabs = driver
                                         .findElements(By.cssSelector(
                                                         "#upgrade > div.k7aPGc > c-wiz > div.S4aDh > div > button"));
-                        tabs.get(1).click();
+                        if (!tabs.isEmpty()) {
+                                tabs.get(1).click();
 
-                        pricePerAnnum = !priceCard.findElements(By.cssSelector("div.tKV7vb > span"))
-                                        .isEmpty()
-                                                        ? priceCard.findElement(By.cssSelector(
-                                                                        "div.tKV7vb > span")).getText()
-                                                        : "";
-                        tabs.get(0).click();
-                        //
+                                pricePerAnnum = !priceCard.findElements(By.cssSelector("div.tKV7vb > span"))
+                                                .isEmpty()
+                                                                ? priceCard.findElement(By.cssSelector(
+                                                                                "div.tKV7vb > span")).getText()
+                                                                : "";
+                                tabs.get(0).click();
+                                //
+                        }
 
                         pricingFileWriter.append(provider + "," + pricePerAnnum + "," + pricePerMonth + "," + capacity
                                         + ","
@@ -111,25 +113,4 @@ public class GoogleDrive {
                 driver.quit();
         }
 
-        public static void scrapeDataFromHome(WebDriver driver) throws IOException {
-                FileWriter fileWriter = new FileWriter("home_page_scraper.csv");
-
-                // Write the header for the CSV file
-                fileWriter.append("Title,Headline,Caption\n");
-
-                // Get data with xpath from page
-                String title = driver.getTitle(),
-                                header = driver.findElement(
-                                                By.xpath("/html/body/div[2]/main/section[1]/div/div/div[1]/div[1]/h1"))
-                                                .getText(),
-                                caption = driver.findElement(
-                                                By.xpath("/html/body/div[2]/main/section[1]/div/div/div[1]/div[2]/p"))
-                                                .getText();
-
-                fileWriter.append(title + "," + header + "," + caption);
-
-                // Flush and close the CSV file to save the data
-                fileWriter.flush();
-                fileWriter.close();
-        }
 }
