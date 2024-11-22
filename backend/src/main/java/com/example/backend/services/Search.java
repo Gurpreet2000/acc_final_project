@@ -1,52 +1,20 @@
 package com.example.backend.services;
 
+import com.example.backend.type.InvertedIndexTrie;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.FileReader;
 import java.nio.file.*;
 import java.util.*;
 
-class TrieNode {
-    Map<Character, TrieNode> children = new HashMap<>();
-    boolean isEndOfWord = false;
-    Map<String, List<Integer>> documentPositions = new HashMap<>(); // Document -> List of Line Numbers
-}
-
-class InvertedIndexTrie {
-    private TrieNode root = new TrieNode();
-
-    public void addWord(String word, String document, int lineNumber) {
-        TrieNode current = root;
-        for (char c : word.toCharArray()) {
-            current.children.putIfAbsent(c, new TrieNode());
-            current = current.children.get(c);
-        }
-        current.isEndOfWord = true;
-        current.documentPositions.putIfAbsent(document, new ArrayList<>());
-        current.documentPositions.get(document).add(lineNumber);
-    }
-
-    public Map<String, List<Integer>> search(String word) {
-        TrieNode current = root;
-        for (char c : word.toCharArray()) {
-            if (!current.children.containsKey(c)) {
-                return new HashMap<>();
-            }
-            current = current.children.get(c);
-        }
-        return current.isEndOfWord ? current.documentPositions : new HashMap<>();
-    }
-}
-
 public class Search {
-    public static void main(String[] args) {
+    public InvertedIndexTrie invertedIndex = new InvertedIndexTrie();
+    static Map<String, String[]> fileHeaders = new HashMap<>();
+    static Map<String, List<String[]>> fileRows = new HashMap<>();
+
+    public void buildTrie() {
         String directoryPath = "./data"; // Directory containing CSV files
-        InvertedIndexTrie invertedIndex = new InvertedIndexTrie();
-        Map<String, String[]> fileHeaders = new HashMap<>();
-        Map<String, List<String[]>> fileRows = new HashMap<>();
 
         System.out.println("Building the inverted index Trie. Please wait...");
 
@@ -90,10 +58,17 @@ public class Search {
                     });
 
             System.out.println("Inverted index Trie has been built successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void main(String[] args) {
+        try {
+            buildTrie();
             Scanner scanner = new Scanner(System.in);
             while (true) {
-                System.out.println("\nEnter a word to search (or type 'exit' to quit): ");
+                System.out.println("\nEnter a word to search or prefix for suggestions (type 'exit' to quit): ");
                 String query = scanner.nextLine().trim().toLowerCase();
 
                 if (query.equals("exit")) {
@@ -101,37 +76,50 @@ public class Search {
                     break;
                 }
 
-                Map<String, List<Integer>> searchResults = invertedIndex.search(query);
-                JSONArray outputJson = new JSONArray();
+                // Provide autocomplete suggestions
+                List<String> suggestions = invertedIndex.autocomplete(query);
+                if (!suggestions.isEmpty()) {
+                    System.out.println("Autocomplete suggestions for '" + query + "': " + suggestions);
+                }
 
+                // Search functionality
+                Map<String, List<Integer>> searchResults = invertedIndex.search(query);
                 if (searchResults.isEmpty()) {
                     System.out.println("No results found for '" + query + "'.");
                 } else {
-                    searchResults.forEach((documentId, lineNumbers) -> {
-                        String[] headers = fileHeaders.get(documentId);
-                        List<String[]> rows = fileRows.get(documentId);
-
-                        for (int lineNumber : lineNumbers) {
-                            if (lineNumber - 1 < rows.size()) { // Adjust for 0-based index
-                                JSONObject rowJson = new JSONObject();
-                                rowJson.put("document", documentId);
-                                String[] row = rows.get(lineNumber - 1);
-
-                                for (int i = 0; i < headers.length && i < row.length; i++) {
-                                    rowJson.put(headers[i], row[i]);
-                                }
-
-                                outputJson.put(rowJson);
-                            }
-                        }
-                    });
-
-                    System.out.println(outputJson.toString(4)); // Pretty-print JSON
+                    convertToJson(searchResults);
                 }
             }
             scanner.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Map<String, Object>> convertToJson(Map<String, List<Integer>> searchResults) {
+        List<Map<String, Object>> outputList = new ArrayList<>();
+
+        searchResults.forEach((documentId, lineNumbers) -> {
+            String[] headers = fileHeaders.get(documentId);
+            List<String[]> rows = fileRows.get(documentId);
+
+            for (int lineNumber : lineNumbers) {
+                if (lineNumber - 1 < rows.size()) { // Adjust for 0-based index
+                    Map<String, Object> rowMap = new HashMap<>();
+                    rowMap.put("document", documentId);
+                    String[] row = rows.get(lineNumber - 1);
+
+                    for (int i = 0; i < headers.length && i < row.length; i++) {
+                        rowMap.put(headers[i], row[i]);
+                    }
+
+                    outputList.add(rowMap);
+                }
+            }
+        });
+
+        // System.out.println(outputJson.toString(4)); // Pretty-print JSON
+
+        return outputList;
     }
 }
