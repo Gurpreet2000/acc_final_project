@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -14,6 +15,15 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class GoogleDrive {
+        public static void main(String[] args) {
+                GoogleDrive googleDrive = new GoogleDrive();
+                try {
+                        googleDrive.init();
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+        }
+
         public void init() throws IOException {
                 // Create a new instance of the ChromeDriver, which will control Chrome
                 WebDriver driver = new ChromeDriver();
@@ -34,23 +44,28 @@ public class GoogleDrive {
                 File file = new File("./data/google-drive.csv");
                 file.getParentFile().mkdirs();
 
-                FileWriter pricingFileWriter = new FileWriter("./data/google-drive.csv");
+                FileWriter pricingFileWriter = new FileWriter("./backend/data/google-drive.csv");
 
                 // Write the header for the CSV file
                 pricingFileWriter.append(
-                                "Provider,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
+                                "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
 
                 // Iterate over each pricing card to extract data
                 for (WebElement priceCard : pricingList) {
-                        String provider = "google", pricePerAnnum = "",
+                        String provider = "google", planName = !priceCard.findElements(By.cssSelector("div.YgStxe"))
+                                        .isEmpty()
+                                                        ? priceCard.findElement(By.cssSelector(
+                                                                        "div.YgStxe")).getText()
+                                                        : "",
+                                        pricePerAnnum = "",
                                         pricePerMonth = !priceCard.findElements(By.cssSelector("div.tKV7vb > span"))
                                                         .isEmpty()
                                                                         ? priceCard.findElement(By.cssSelector(
                                                                                         "div.tKV7vb > span")).getText()
                                                                         : "",
                                         capacity = priceCard.findElement(By.cssSelector("div.Qnu87d.CMqFSd")).getText(),
-                                        fileTypesSupported = "",
-                                        platformCompatibility = "", url = driver.getCurrentUrl(), contactEmail = "",
+                                        fileTypesSupported = "All",
+                                        platformCompatibility = "All", url = driver.getCurrentUrl(), contactEmail = "",
                                         contactNumber = "";
 
                         StringBuilder specialFeatures = new StringBuilder("\"");
@@ -95,7 +110,13 @@ public class GoogleDrive {
                                 //
                         }
 
-                        pricingFileWriter.append(provider + "," + pricePerAnnum + "," + pricePerMonth + "," + capacity
+                        pricingFileWriter.append(provider + "," + planName + ","
+                                        + Pattern.compile("\\d+\\.\\d+").matcher(pricePerAnnum).results()
+                                                        .map(match -> match.group()).findFirst().orElse("")
+                                        + ","
+                                        + Pattern.compile("\\d+\\.\\d+").matcher(pricePerMonth).results()
+                                                        .map(match -> match.group()).findFirst().orElse("")
+                                        + "," + capacity
                                         + ","
                                         + fileTypesSupported + "," +
                                         specialFeatures.toString() + "," + platformCompatibility + "," + url + ","

@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import SearchBar from './components/SearchBar';
+import apiCall from '@/lib/apiCall';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './components/ui/table';
+import PlanList from './components/PlanList';
+import { ThemeProvider } from './components/theme-provider';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    if (!searchTerm) {
+      setSuggestions([]);
+      return;
+    }
+
+    apiCall
+      .get('/auto_complete', { params: { q: searchTerm } })
+      .then(res => {
+        // setShowSuggestions(true);
+        setSuggestions(res?.data?.data);
+      })
+      .catch(err => console.error(err));
+  }, [searchTerm]);
+
+  const onSearch = () => {
+    apiCall
+      .get('/search', { params: { q: searchTerm } })
+      .then(res => setList(res?.data?.data))
+      .catch(err => console.error(err))
+      .finally(() => {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="p-4 flex h-full flex-col">
+      <SearchBar
+        data={suggestions}
+        value={searchTerm}
+        setValue={setSearchTerm}
+        onSearch={onSearch}
+        showSuggestions={showSuggestions}
+        setShowSuggestions={setShowSuggestions}
+      />
+      <PlanList data={list} />
+    </div>
+  );
+};
 
-export default App
+export default () => (
+  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <App />
+  </ThemeProvider>
+);
