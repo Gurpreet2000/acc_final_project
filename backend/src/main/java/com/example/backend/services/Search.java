@@ -1,11 +1,11 @@
 package com.example.backend.services;
 
 import com.example.backend.type.InvertedIndexTrie;
+import com.example.backend.utils.FileUtils;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
 import java.io.FileReader;
-import java.nio.file.*;
 import java.util.*;
 
 public class Search {
@@ -14,48 +14,44 @@ public class Search {
     static Map<String, List<String[]>> fileRows = new HashMap<>();
 
     public void buildTrie() {
-        String directoryPath = "./data"; // Directory containing CSV files
 
         System.out.println("Building the inverted index Trie. Please wait...");
 
         try {
-            Files.walk(Paths.get(directoryPath))
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".csv"))
-                    .forEach(path -> {
-                        try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(path.toString())).build()) {
-                            String documentId = path.toString();
+            FileUtils.readFiles("./data", path -> {
+                try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(path.toString())).build()) {
+                    String documentId = path.toString();
 
-                            // Read headers
-                            String[] headers = csvReader.readNext();
-                            if (headers == null) {
-                                System.out.println("File " + documentId + " is empty or missing headers.");
-                                return;
+                    // Read headers
+                    String[] headers = csvReader.readNext();
+                    if (headers == null) {
+                        System.out.println("File " + documentId + " is empty or missing headers.");
+                        return;
+                    }
+                    fileHeaders.put(documentId, headers);
+
+                    List<String[]> rows = new ArrayList<>();
+                    String[] row;
+                    int lineNumber = 0;
+
+                    while ((row = csvReader.readNext()) != null) {
+                        lineNumber++;
+                        rows.add(row);
+
+                        // Add words to the Trie
+                        String rowContent = String.join(" ", row).toLowerCase();
+                        String[] words = rowContent.split("\\W+"); // Normalize content into words
+                        for (String word : words) {
+                            if (!word.isEmpty()) {
+                                invertedIndex.addWord(word, documentId, lineNumber);
                             }
-                            fileHeaders.put(documentId, headers);
-
-                            List<String[]> rows = new ArrayList<>();
-                            String[] row;
-                            int lineNumber = 0;
-
-                            while ((row = csvReader.readNext()) != null) {
-                                lineNumber++;
-                                rows.add(row);
-
-                                // Add words to the Trie
-                                String rowContent = String.join(" ", row).toLowerCase();
-                                String[] words = rowContent.split("\\W+"); // Normalize content into words
-                                for (String word : words) {
-                                    if (!word.isEmpty()) {
-                                        invertedIndex.addWord(word, documentId, lineNumber);
-                                    }
-                                }
-                            }
-                            fileRows.put(documentId, rows);
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-                    });
+                    }
+                    fileRows.put(documentId, rows);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
 
             System.out.println("Inverted index Trie has been built successfully!");
         } catch (Exception e) {
