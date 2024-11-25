@@ -1,8 +1,9 @@
 package com.example.backend;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 
@@ -14,7 +15,6 @@ import com.example.backend.model.AutoComplete;
 import com.example.backend.model.Greeting;
 import com.example.backend.model.SearchQuery;
 import com.example.backend.services.Search;
-import com.example.backend.services.WebCrawler;
 
 @RestController
 public class Controller {
@@ -22,9 +22,8 @@ public class Controller {
 
     @PostConstruct
     public void init() {
-        // (new WebCrawler()).init();
+        // Initialize the search and build the Trie
         search.buildTrie();
-        // inverted index
     }
 
     private static final String template = "Hello, %s!";
@@ -36,11 +35,43 @@ public class Controller {
     }
 
     @GetMapping("/search")
-    public SearchQuery search(@RequestParam(value = "q", defaultValue = "") String query) {
-        System.out.println("Query: " + query);
-        List<Map<String, Object>> list = search.convertToJson(search.invertedIndex.search(query));
+    public SearchQuery search(
+            @RequestParam(value = "q", defaultValue = "") String query,
+            @RequestParam(value = "price", defaultValue = "") String priceRange,
+            @RequestParam(value = "storage", defaultValue = "") String storageRange) {
 
-        System.out.println(list);
+        System.out.println("Query: " + query + ", Price: " + priceRange + ", Storage: " + storageRange);
+
+        Map<String, HashSet<Integer>> searchResultIndex = new HashMap<>();
+
+        // Handle general query
+        if (!query.isEmpty()) {
+            searchResultIndex = search.invertedIndex.search(query);
+        }
+
+        // Handle price range query
+        if (!priceRange.isEmpty()) {
+            double[] priceBounds = extractRange(priceRange);
+            if (priceBounds != null) {
+                Map<String, HashSet<Integer>> priceResults = search.invertedIndex.searchRange("price per month",
+                        priceBounds[0], priceBounds[1]);
+                mergeResults(searchResultIndex, priceResults);
+            }
+        }
+
+        // Handle storage range query
+        if (!storageRange.isEmpty()) {
+            double[] storageBounds = extractRange(storageRange);
+            if (storageBounds != null) {
+                Map<String, HashSet<Integer>> storageResults = search.invertedIndex.searchRange("capacity",
+                        storageBounds[0], storageBounds[1]);
+                mergeResults(searchResultIndex, storageResults);
+            }
+        }
+
+        List<Map<String, Object>> list = search.convertToJson(searchResultIndex);
+        System.out.println(searchResultIndex);
+
         return new SearchQuery(list);
     }
 
@@ -52,4 +83,24 @@ public class Controller {
         return new AutoComplete(list);
     }
 
+    private double[] extractRange(String range) {
+        Pattern pattern = Pattern.compile("\\[(\\d+\\.?\\d*),(\\d+\\.?\\d*)]");
+        Matcher matcher = pattern.matcher(range);
+
+        if (matcher.matches()) {
+            double min = Double.parseDouble(matcher.group(1));
+            double max = Double.parseDouble(matcher.group(2));
+            return new double[] { min, max };
+        }
+        System.out.println("Invalid range format: " + range);
+        return null; // Return null if the range is invalid
+    }
+
+    private void mergeResults(Map<String, HashSet<Integer>> mainResults,
+            Map<String, HashSet<Integer>> newResults) {
+        newResults.forEach((key, value) -> mainResults.merge(key, value, (oldSet, newSet) -> {
+            oldSet.addAll(newSet);
+            return oldSet;
+        }));
+    }
 }

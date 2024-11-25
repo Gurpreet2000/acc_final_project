@@ -1,0 +1,12 @@
+Provider,Plan Name,Yearly Price,Monthly Price,Capacity,Types Supported,Special Features,Platform Compatibility,URL,Contact Name,Contact Email
+Amazon S3,S3 Standard,,,50 TB,All,"S3 Standard - General purpose storage for any type of data, typically used for frequently accessed data",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Intelligent - Tiering,,,450 TB,All,"First 50 TB / Month : $0.023 per GB",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Standard - Infrequent Access,,,50 TB,All,"Next 450 TB / Month : $0.021 per GB",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Express One Zone,,,450 TB,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Glacier Instant Retrieval,,,500 TB,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Glacier Flexible Retrieval,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Glacier Deep Archive,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 One Zone - Infrequent Access,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Intelligent-Tiering,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 Standard-Infrequent Access,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
+Amazon S3,S3 One Zone-Infrequent Access,,,,All,"N/A",ALL,https://aws.amazon.com/s3/?nc=sn&loc=1,,
