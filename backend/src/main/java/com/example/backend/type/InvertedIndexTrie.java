@@ -5,7 +5,7 @@ import java.util.*;
 class TrieNode {
     Map<Character, TrieNode> children = new HashMap<>();
     boolean isEndOfWord = false;
-    Map<String, List<Integer>> documentPositions = new HashMap<>(); // Document -> List of Line Numbers
+    Map<String, HashSet<Integer>> documentPositions = new HashMap<>(); // Document -> List of Line Numbers
 }
 
 public class InvertedIndexTrie {
@@ -18,11 +18,11 @@ public class InvertedIndexTrie {
             current = current.children.get(c);
         }
         current.isEndOfWord = true;
-        current.documentPositions.putIfAbsent(document, new ArrayList<>());
+        current.documentPositions.putIfAbsent(document, new HashSet<>());
         current.documentPositions.get(document).add(lineNumber);
     }
 
-    public Map<String, List<Integer>> search(String word) {
+    public Map<String, HashSet<Integer>> search(String word) {
         TrieNode current = root;
         for (char c : word.toCharArray()) {
             if (!current.children.containsKey(c)) {

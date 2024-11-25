@@ -59,9 +59,10 @@ public class Search {
         }
     }
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         try {
-            buildTrie();
+            Search search = new Search();
+            search.buildTrie();
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 System.out.println("\nEnter a word to search or prefix for suggestions (type 'exit' to quit): ");
@@ -73,17 +74,20 @@ public class Search {
                 }
 
                 // Provide autocomplete suggestions
-                List<String> suggestions = invertedIndex.autocomplete(query);
+                List<String> suggestions = search.invertedIndex.autocomplete(query);
                 if (!suggestions.isEmpty()) {
-                    System.out.println("Autocomplete suggestions for '" + query + "': " + suggestions);
+                    System.out.println("Autocomplete suggestions for '" + query + "': " +
+                            suggestions);
                 }
 
                 // Search functionality
-                Map<String, List<Integer>> searchResults = invertedIndex.search(query);
+                Map<String, HashSet<Integer>> searchResults = search.invertedIndex.search(query);
                 if (searchResults.isEmpty()) {
                     System.out.println("No results found for '" + query + "'.");
                 } else {
-                    convertToJson(searchResults);
+                    System.out.println("Result '" + searchResults + "'.");
+
+                    search.convertToJson(searchResults);
                 }
             }
             scanner.close();
@@ -92,7 +96,7 @@ public class Search {
         }
     }
 
-    public List<Map<String, Object>> convertToJson(Map<String, List<Integer>> searchResults) {
+    public List<Map<String, Object>> convertToJson(Map<String, HashSet<Integer>> searchResults) {
         List<Map<String, Object>> outputList = new ArrayList<>();
 
         searchResults.forEach((documentId, lineNumbers) -> {
