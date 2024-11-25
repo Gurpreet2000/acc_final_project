@@ -55,7 +55,6 @@ const SearchBar = ({
                   setDebounceText(e);
                   setShowSuggestions(false);
                   setValue(e);
-                  setTimeout(() => onSearch(), 0);
                 }}
               >
                 {text}

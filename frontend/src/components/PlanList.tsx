@@ -27,8 +27,13 @@ const PlanList = ({ data = [] }: { data: Array<{}> }) => {
             >
               <div className="flex flex-row flex-grow gap-2 mr-5">
                 <div className="flex flex-1 flex-col gap-2">
-                  <span className="font-bold text-xl capitalize">
-                    {e?.Provider}
+                  <span>
+                    <span className="font-bold text-xl capitalize mr-2">
+                      {e?.Provider}
+                    </span>
+                    <span className="text-base capitalize">
+                      {e?.['Plan Name']}
+                    </span>
                   </span>
 
                   <span>{e?.Capacity}</span>
