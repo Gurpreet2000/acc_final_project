@@ -44,7 +44,7 @@ public class AutoCorrection {
         System.out.println("Building the dictionary from CSV files...");
 
         try {
-            FileUtils.readFiles("./data", path -> {
+            FileUtils.readFiles(directoryPath, path -> {
                 try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(path.toString())).build()) {
                     String[] row;
                     while ((row = csvReader.readNext()) != null) {
