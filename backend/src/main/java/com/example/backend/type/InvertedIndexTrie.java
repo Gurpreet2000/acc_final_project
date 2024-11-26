@@ -67,6 +67,7 @@ public class InvertedIndexTrie {
     }
 
     public Map<String, HashSet<Integer>> searchRange(String key, double minValue, double maxValue) {
+        // Create a completely new results map with a defensive copy mechanism
         Map<String, HashSet<Integer>> results = new HashMap<>();
 
         TrieNode current = root;
@@ -81,28 +82,29 @@ public class InvertedIndexTrie {
         // Collect all terms with the given prefix
         List<String> matchedTerms = new ArrayList<>();
         collectAllWords(current, searchPrefix, matchedTerms);
-        for (String term : matchedTerms) {
 
+        for (String term : matchedTerms) {
             String[] parts = term.split(":");
             if (parts.length == 2) {
                 try {
-                    // System.out.println("termValue: " + parts[1]);
                     double termValue = Double.parseDouble(parts[1]);
-
-                    // System.out.println("minValue: " + minValue + "maxValue: " + maxValue);
 
                     // Check if the term's value is within the range
                     if (termValue >= minValue && termValue <= maxValue) {
                         Map<String, HashSet<Integer>> termResults = search(term);
-                        System.out.println(termValue + " - " + term + " - " + termResults);
-                        termResults.forEach((doc, lines) -> results.merge(doc, lines, (oldSet, newSet) -> {
-                            oldSet.addAll(newSet);
-                            return oldSet;
-                        }));
+
+                        // Create deep copies of results to prevent reference sharing
+                        for (Map.Entry<String, HashSet<Integer>> entry : termResults.entrySet()) {
+                            results.merge(entry.getKey(),
+                                    new HashSet<>(entry.getValue()),
+                                    (oldSet, newSet) -> {
+                                        oldSet.addAll(newSet);
+                                        return oldSet;
+                                    });
+                        }
                     }
                 } catch (NumberFormatException e) {
                     // Ignore non-numeric terms
-                    // e.printStackTrace();
                 }
             }
         }
