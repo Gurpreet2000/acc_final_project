@@ -18,8 +18,8 @@ public class WebCrawler {
             String directory = "./data";
             (new GoogleDrive()).init(directory);
             (new Dropbox()).init(directory);
-            (new Amazon()).init(directory);
             (new Icloud()).init(directory);
+            (new Amazon()).init(directory);
         } catch (IOException e) {
             e.printStackTrace();
         }

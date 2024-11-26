@@ -33,8 +33,12 @@ const SearchBar = ({
     return () => clearTimeout(timeout);
   }, [debounceText]);
 
+  useEffect(() => {
+    setDebounceText(value);
+  }, [value]);
+
   return (
-    <div className="flex flex-row gap-5 align-middle self-center w-[75%]">
+    <div className="flex flex-row gap-5 align-middle">
       <Command
         onFocus={() => setShowSuggestions(true)}
         onBlur={() => setShowSuggestions(false)}

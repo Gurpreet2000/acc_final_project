@@ -3,21 +3,43 @@ import SearchBar from './components/SearchBar';
 import apiCall from '@/lib/apiCall';
 import PlanList from './components/PlanList';
 import { ThemeProvider } from './components/theme-provider';
-import StorageSelector from './components/StorageSelector';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from './components/ui/resizable';
+import MinMaxRangeSelector from './components/MinMaxRangeSelector';
 import { Separator } from './components/ui/separator';
 import { Button } from './components/ui/button';
+import { parseCapacity } from './lib/utils';
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [spellCheck, setSpellCheck] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [list, setList] = useState([]);
-  const [capacity, setCapacity] = useState({ min: 1024, max: 1024 * 75 });
+  const [capacityRange, setCapacity] = useState({ min: null, max: null });
+  const [capacityList, setCapacityList] = useState<
+    {
+      label: string;
+      value: any;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    apiCall
+      .get('/storage_list')
+      .then(res => {
+        const sortedList = res?.data?.data
+          .map((e: any) => +e)
+          .sort((a: number, b: number) => a > b);
+        setCapacityList(
+          sortedList.map((e: number) => ({
+            label: parseCapacity(+e),
+            value: +e,
+          }))
+        );
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }, []);
 
   useEffect(() => {
     if (!searchTerm) {
@@ -29,23 +51,23 @@ const App = () => {
       .get('/auto_complete', {
         params: { q: searchTerm },
       })
-      .then(res => {
-        // setShowSuggestions(true);
-        setSuggestions(res?.data?.data);
-      })
+      .then(res => setSuggestions(res?.data?.data))
       .catch(err => console.error(err));
   }, [searchTerm]);
 
-  const onSearch = () => {
+  const onSearch = (query?: string) => {
     apiCall
       .get('/search', {
         params: {
-          q: searchTerm,
-          minStorage: capacity.min,
-          maxStorage: capacity.max,
+          q: query || searchTerm,
+          minStorage: capacityRange.min,
+          maxStorage: capacityRange.max,
         },
       })
-      .then(res => setList(res?.data?.data))
+      .then(res => {
+        setList(res?.data?.data);
+        setSpellCheck(res?.data?.spellCheck);
+      })
       .catch(err => console.error(err))
       .finally(() => {
         setSuggestions([]);
@@ -56,11 +78,21 @@ const App = () => {
   return (
     <div className="p-4 flex h-full flex-row gap-5">
       <div className="flex flex-col gap-3 p-5">
-        <StorageSelector setValue={setCapacity} value={capacity} />
-        <Button onClick={onSearch}>Filter</Button>
+        <MinMaxRangeSelector
+          label="Select Capacity"
+          setValue={setCapacity}
+          value={capacityRange}
+          minList={capacityList.filter(e =>
+            capacityRange.max ? +e?.value <= +capacityRange.max : true
+          )}
+          maxList={capacityList.filter(e =>
+            capacityRange.min ? +e?.value >= +capacityRange.min : true
+          )}
+        />
+        <Button onClick={() => onSearch()}>Filter</Button>
       </div>
       <Separator orientation="vertical" />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 align-middle mx-[10%]">
         <SearchBar
           data={suggestions}
           value={searchTerm}
@@ -69,6 +101,21 @@ const App = () => {
           showSuggestions={showSuggestions}
           setShowSuggestions={setShowSuggestions}
         />
+        {!!spellCheck && (
+          <div className="my-3">
+            Do you mean:{' '}
+            <a
+              className="underline cursor-pointer"
+              onClick={() => {
+                setSearchTerm(spellCheck);
+                onSearch(spellCheck);
+              }}
+            >
+              {spellCheck}
+            </a>
+            ?
+          </div>
+        )}
         <PlanList data={list} />
       </div>
     </div>

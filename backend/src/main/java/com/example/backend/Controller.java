@@ -40,7 +40,7 @@ public class Controller {
 
     @GetMapping("/auto_complete")
     public AutoComplete autoComplete(@RequestParam(value = "q", defaultValue = "") String query) {
-        System.out.println("Query: " + query);
+        // System.out.println("Query: " + query);
         List<String> list = search.invertedIndex.autocomplete(query);
         System.out.println(list);
         return new AutoComplete(list);
@@ -48,7 +48,7 @@ public class Controller {
 
     @GetMapping("/storage_list")
     public StorageList storageList(@RequestParam(value = "q", defaultValue = "") String query) {
-        System.out.println("Query: " + query);
+        // System.out.println("Query: " + query);
         List<Object> list = Arrays.asList(search.storageSizes.toArray());
         System.out.println(list);
         return new StorageList(list);
@@ -62,8 +62,9 @@ public class Controller {
             @RequestParam(value = "minStorage", defaultValue = "") String minStorage,
             @RequestParam(value = "maxStorage", defaultValue = "") String maxStorage) {
 
-        System.out.println("Raw Input -> Query: " + query + ", Min Price: " + minPrice + ", Max Price: " + maxPrice
-                + ", Min Storage: " + minStorage + ", Max Storage: " + maxStorage);
+        // System.out.println("Raw Input -> Query: " + query + ", Min Price: " +
+        // minPrice + ", Max Price: " + maxPrice
+        // + ", Min Storage: " + minStorage + ", Max Storage: " + maxStorage);
 
         double minPriceVal = parseDoubleWithDefault(minPrice, 0); // Default to 0
         double maxPriceVal = parseDoubleWithDefault(maxPrice, Double.MAX_VALUE); // Default to maximum value
