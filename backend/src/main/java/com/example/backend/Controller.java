@@ -15,16 +15,19 @@ import com.example.backend.model.AutoComplete;
 import com.example.backend.model.Greeting;
 import com.example.backend.model.SearchQuery;
 import com.example.backend.model.StorageList;
+import com.example.backend.services.SpellCheck;
 import com.example.backend.services.Search;
 
 @RestController
 public class Controller {
     private static final Search search = new Search();
+    private static final SpellCheck spellCheck = new SpellCheck();
 
     @PostConstruct
     public void init() {
         // Initialize the search and build the Trie
         search.buildTrie();
+        spellCheck.buildDictionary();
     }
 
     private static final String template = "Hello, %s!";
@@ -72,10 +75,15 @@ public class Controller {
         // ", Min Storage: " + minStorageVal + ", Max Storage: " + maxStorageVal);
 
         Map<String, HashSet<Integer>> searchResultIndex = new HashMap<>();
+        String string = "";
 
         // Handle general query
         if (!query.isEmpty()) {
             searchResultIndex = search.invertedIndex.search(query);
+            System.out.println(searchResultIndex.entrySet().isEmpty());
+            if (searchResultIndex.entrySet().isEmpty()) {
+                string = spellCheck.findClosestWord(query);
+            }
         }
 
         // Handle price range query
@@ -94,9 +102,8 @@ public class Controller {
 
         // Convert the search results to JSON format
         List<Map<String, Object>> list = search.convertToJson(searchResultIndex);
-        System.out.println(searchResultIndex);
 
-        return new SearchQuery(list);
+        return new SearchQuery(list, string);
     }
 
     /**

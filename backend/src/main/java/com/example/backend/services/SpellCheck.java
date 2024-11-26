@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner; // Import for Scanner
 
-public class AutoCorrection {
+public class SpellCheck {
 
     private final List<String> dictionary = new ArrayList<>(); // To store all words from CSV files
 
@@ -81,12 +81,14 @@ public class AutoCorrection {
             }
         }
 
-        return "Closest match: \"" + closestWord + "\", Edit Distance: " + minDistance;
+        System.out.println("Closest match: \"" + closestWord + "\", Edit Distance: " + minDistance);
+
+        return closestWord;
     }
 
     // Main method to test the functionality
     public static void main(String[] args) {
-        AutoCorrection autoCorrection = new AutoCorrection();
+        SpellCheck autoCorrection = new SpellCheck();
         autoCorrection.buildDictionary();
 
         System.out.print("Enter a misspelled word: ");
