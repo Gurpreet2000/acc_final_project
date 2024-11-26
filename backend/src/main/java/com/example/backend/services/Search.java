@@ -10,8 +10,10 @@ import java.util.*;
 
 public class Search {
     public InvertedIndexTrie invertedIndex = new InvertedIndexTrie();
+    public InvertedIndexTrie invertedIndexKeyMapped = new InvertedIndexTrie();
     static Map<String, String[]> fileHeaders = new HashMap<>();
     static Map<String, List<String[]>> fileRows = new HashMap<>();
+    public HashSet<String> storageSizes = new HashSet<>();
 
     public void buildTrie() {
 
@@ -38,14 +40,30 @@ public class Search {
                         lineNumber++;
                         rows.add(row);
 
-                        // Add words to the Trie
-                        String rowContent = String.join(" ", row).toLowerCase();
-                        String[] words = rowContent.split("\\W+"); // Normalize content into words
-                        for (String word : words) {
-                            if (!word.isEmpty()) {
-                                invertedIndex.addWord(word, documentId, lineNumber);
+                        for (int i = 0; i < row.length; i++) {
+                            String key = headers[i].toLowerCase(); // e.g., "capacity"
+                            String value = row[i];
+
+                            if (value != null && !value.isEmpty()) {
+                                // Normalize capacities (e.g., "15 GB" to 15, "2 TB" to 2000)
+                                if (key.equals("capacity")) {
+                                    value = normalizeCapacity(value); // Convert GB/TB to numeric value
+                                    storageSizes.add(value);
+                                }
+                            }
+
+                            if (value != null && !value.isEmpty()) {
+                                // Add full key-value pair for context-based searches
+                                String indexedTerm = key + ":" + value.toLowerCase();
+                                invertedIndexKeyMapped.addWord(indexedTerm, documentId, lineNumber);
+
+                                // Add just the value for simpler searches
+                                invertedIndex.addWord(row[i].toLowerCase(), documentId, lineNumber);
+                                System.out.println("Value: " + value.toLowerCase());
+                                System.out.println("Indexed: " + indexedTerm);
                             }
                         }
+
                     }
                     fileRows.put(documentId, rows);
                 } catch (Exception e) {
@@ -57,6 +75,17 @@ public class Search {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String normalizeCapacity(String value) {
+        value = value.trim().toUpperCase();
+        if (value.endsWith("GB")) {
+            return value.replace("GB", "").trim();
+        } else if (value.endsWith("TB")) {
+            double tbToGb = Double.parseDouble(value.replace("TB", "").trim()) * 1024;
+            return String.valueOf((int) tbToGb); // Convert TB to GB
+        }
+        return value; // Default case (e.g., invalid data)
     }
 
     public static void main(String[] args) {
@@ -106,6 +135,7 @@ public class Search {
             for (int lineNumber : lineNumbers) {
                 if (lineNumber - 1 < rows.size()) { // Adjust for 0-based index
                     Map<String, Object> rowMap = new HashMap<>();
+                    rowMap.put("id", lineNumber + "_" + documentId);
                     rowMap.put("document", documentId);
                     String[] row = rows.get(lineNumber - 1);
 
