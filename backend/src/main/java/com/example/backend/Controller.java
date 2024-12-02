@@ -13,15 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.model.AutoComplete;
 import com.example.backend.model.Greeting;
+import com.example.backend.model.SearchHistory;
 import com.example.backend.model.SearchQuery;
 import com.example.backend.model.StorageList;
 import com.example.backend.services.SpellCheck;
 import com.example.backend.services.Search;
+import com.example.backend.services.SearchFrequency;
 
 @RestController
 public class Controller {
     private static final Search search = new Search();
     private static final SpellCheck spellCheck = new SpellCheck();
+    private static final SearchFrequency searchFrequency = new SearchFrequency();
+    private static final String searchHistoryPath = "./data/searchHistory.txt";
 
     @PostConstruct
     public void init() {
@@ -54,6 +58,11 @@ public class Controller {
         return new StorageList(list);
     }
 
+    @GetMapping("/search_history")
+    public SearchHistory searchHistory() {
+        return new SearchHistory(searchFrequency.getList(searchHistoryPath));
+    }
+
     @GetMapping("/search")
     public SearchQuery search(
             @RequestParam(value = "q", defaultValue = "") String query,
@@ -81,6 +90,7 @@ public class Controller {
         // Handle general query
         if (!query.isEmpty()) {
             searchResultIndex = search.invertedIndex.search(query);
+            searchFrequency.addHistory(searchHistoryPath, query);
             System.out.println(searchResultIndex.entrySet().isEmpty());
             if (searchResultIndex.entrySet().isEmpty()) {
                 string = spellCheck.findClosestWord(query);

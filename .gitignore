@@ -32,6 +32,7 @@ backend/build/
 
 ### VS Code ###
 backend/.vscode/
+backend/**/searchHistory.txt
 
 ### Frontend-specific ignores ###
 

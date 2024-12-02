@@ -6,8 +6,10 @@ import MinMaxRangeSelector from '@/components/MinMaxRangeSelector';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { parseCapacity } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Search = () => {
+  const [currentTab, setCurrentTab] = useState('search');
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [spellCheck, setSpellCheck] = useState('');
@@ -57,11 +59,10 @@ const Search = () => {
   const onSearch = (query?: string) => {
     apiCall
       .get('/search', {
-        params: {
-          q: query || searchTerm,
-          minStorage: capacityRange.min,
-          maxStorage: capacityRange.max,
-        },
+        params:
+          currentTab === 'search'
+            ? { q: query || searchTerm }
+            : { minStorage: capacityRange.min, maxStorage: capacityRange.max },
       })
       .then(res => {
         setList(res?.data?.data);
@@ -75,31 +76,47 @@ const Search = () => {
   };
 
   return (
-    <div className="p-4 flex h-full flex-row gap-5">
-      <div className="flex flex-col gap-3 p-5">
-        <MinMaxRangeSelector
-          label="Select Capacity"
-          setValue={setCapacity}
-          value={capacityRange}
-          minList={capacityList.filter(e =>
-            capacityRange.max ? +e?.value <= +capacityRange.max : true
-          )}
-          maxList={capacityList.filter(e =>
-            capacityRange.min ? +e?.value >= +capacityRange.min : true
-          )}
-        />
-        <Button onClick={() => onSearch()}>Filter</Button>
-      </div>
-      <Separator orientation="vertical" />
+    <div className="p-4">
+      <Tabs
+        defaultValue="search"
+        onValueChange={setCurrentTab}
+        className="flex flex-col"
+      >
+        <TabsList className="mb-2 self-center">
+          <TabsTrigger value="search">Search</TabsTrigger>
+          <TabsTrigger value="filter">Filter</TabsTrigger>
+        </TabsList>
+        <TabsContent value="search">
+          <SearchBar
+            data={suggestions}
+            value={searchTerm}
+            setValue={setSearchTerm}
+            onSearch={onSearch}
+            showSuggestions={showSuggestions}
+            setShowSuggestions={setShowSuggestions}
+          />
+        </TabsContent>
+        <TabsContent value="filter">
+          <div
+            className="flex flex-row justify-center gap-5"
+            style={{ alignItems: 'center' }}
+          >
+            <MinMaxRangeSelector
+              label="Select Capacity"
+              setValue={setCapacity}
+              value={capacityRange}
+              minList={capacityList.filter(e =>
+                capacityRange.max ? +e?.value <= +capacityRange.max : true
+              )}
+              maxList={capacityList.filter(e =>
+                capacityRange.min ? +e?.value >= +capacityRange.min : true
+              )}
+            />
+            <Button onClick={() => onSearch()}>Filter</Button>
+          </div>
+        </TabsContent>
+      </Tabs>
       <div className="flex flex-col flex-1 align-middle mx-[10%]">
-        <SearchBar
-          data={suggestions}
-          value={searchTerm}
-          setValue={setSearchTerm}
-          onSearch={onSearch}
-          showSuggestions={showSuggestions}
-          setShowSuggestions={setShowSuggestions}
-        />
         {!!spellCheck && (
           <div className="my-3">
             Do you mean:{' '}
@@ -117,6 +134,13 @@ const Search = () => {
         )}
         <PlanList data={list} />
       </div>
+    </div>
+  );
+
+  return (
+    <div className="p-4 flex h-full flex-row gap-5">
+      <div className="flex flex-col gap-3 p-5"></div>
+      <Separator orientation="vertical" />
     </div>
   );
 };

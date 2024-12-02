@@ -28,6 +28,7 @@ public class DataValidation {
     }
 
     public void validate(String filePath) {
+        System.out.println("path: " + filePath);
         List<String[]> validEntries = new ArrayList<>();
         List<String[]> invalidEntries = new ArrayList<>();
 
@@ -83,7 +84,7 @@ public class DataValidation {
             System.out.printf("%-50s | %-10s | %-10s\n", "URL", "Capacity", "Price");
             System.out.println("------------------------------------------------------------");
             for (String[] entry : entries) {
-                System.out.printf("%-50s | %-10s | %-10s\n", entry[0], entry[1], entry[2]);
+                System.out.printf("%s\n", entry);
             }
         }
     }

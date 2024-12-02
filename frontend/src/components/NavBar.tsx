@@ -24,6 +24,13 @@ const NavBar = () => {
             Search
           </NavigationMenuLink>
         </Link>
+        <Link to="/history">
+          <NavigationMenuLink
+            className={navigationMenuTriggerStyle() + ' border-2'}
+          >
+            History
+          </NavigationMenuLink>
+        </Link>
       </NavigationMenuList>
     </NavigationMenu>
   );

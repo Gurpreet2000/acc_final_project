@@ -26,12 +26,12 @@ public class Icloud {
         try {
             String path = directory + "/icloud_plans.csv";
             // Prepare the CSV file
+            File file = new File(path);
+            file.getParentFile().mkdirs();
+
             FileWriter csvWriter = new FileWriter(path);
             csvWriter.append(
                     "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Platform compatibility,URL,Contact Email,Contact Number,Special features\n");
-
-            File file = new File(path);
-            file.getParentFile().mkdirs();
 
             // Navigate to the iCloud page
             driver.get("https://www.apple.com/ca/icloud/");
