@@ -27,9 +27,9 @@ const Search = () => {
     apiCall
       .get('/storage_list')
       .then(res => {
-        const sortedList = res?.data?.data
-          .map((e: any) => +e)
-          .sort((a: number, b: number) => a > b);
+        const sortedList = res?.data?.data.map((e: any) => +e);
+        sortedList.sort((a: number, b: number) => (a > b ? 1 : -1));
+
         setCapacityList(
           sortedList.map((e: number) => ({
             label: parseCapacity(+e),
@@ -116,9 +116,10 @@ const Search = () => {
           </div>
         </TabsContent>
       </Tabs>
+      <Separator orientation="horizontal" className="my-3" />
       <div className="flex flex-col flex-1 align-middle mx-[10%]">
         {!!spellCheck && (
-          <div className="my-3">
+          <div className="mb-3">
             Do you mean:{' '}
             <a
               className="underline cursor-pointer"
