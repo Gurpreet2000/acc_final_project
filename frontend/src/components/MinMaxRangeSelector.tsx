@@ -30,7 +30,7 @@ const MinMaxRangeSelector = (props: {
       <div className="font-bold">
         {props?.label}
         <a
-          className=" font-medium underline text-sm ml-2"
+          className=" font-medium underline text-sm ml-2 cursor-pointer"
           onClick={() => {
             setRange({ max: null, min: null });
             setForceReload(p => !p);
