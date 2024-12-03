@@ -11,13 +11,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const History = () => {
+const FrequencyCount = () => {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
     apiCall
-      .get('/search_history')
+      .get('/frequency_counter')
       .then(res => {
         const list = Array.isArray(res.data?.list) ? res.data?.list : [];
         setData(list);
@@ -61,4 +61,4 @@ const History = () => {
   );
 };
 
-export default History;
+export default FrequencyCount;

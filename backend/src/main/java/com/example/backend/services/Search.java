@@ -59,8 +59,6 @@ public class Search {
 
                                 // Add just the value for simpler searches
                                 invertedIndex.addWord(row[i].toLowerCase(), documentId, lineNumber);
-                                System.out.println("Value: " + value.toLowerCase());
-                                System.out.println("Indexed: " + indexedTerm);
                             }
                         }
 

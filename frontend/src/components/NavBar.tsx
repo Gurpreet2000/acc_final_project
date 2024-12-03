@@ -8,27 +8,26 @@ import { Link } from 'react-router';
 
 const NavBar = () => {
   return (
-    <NavigationMenu className=" border-b-2 max-w-[100%] p-2 mb-2 justify-start">
+    <NavigationMenu className="   max-w-[100%] p-2 mb-2 justify-start scroll">
       <NavigationMenuList>
         <Link to="/">
-          <NavigationMenuLink
-            className={navigationMenuTriggerStyle() + ' border-2'}
-          >
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
             Home
           </NavigationMenuLink>
         </Link>
         <Link to="/search">
-          <NavigationMenuLink
-            className={navigationMenuTriggerStyle() + ' border-2'}
-          >
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
             Search
           </NavigationMenuLink>
         </Link>
-        <Link to="/history">
-          <NavigationMenuLink
-            className={navigationMenuTriggerStyle() + ' border-2'}
-          >
-            History
+        <Link to="/search_history">
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            Search History
+          </NavigationMenuLink>
+        </Link>
+        <Link to="/frequency">
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            Frequency Count
           </NavigationMenuLink>
         </Link>
       </NavigationMenuList>

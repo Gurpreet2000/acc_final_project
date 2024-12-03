@@ -2,8 +2,6 @@ package com.example.backend;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 
@@ -14,9 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.model.AutoComplete;
 import com.example.backend.model.Greeting;
 import com.example.backend.model.SearchHistory;
+import com.example.backend.model.WordFrequency;
 import com.example.backend.model.SearchQuery;
+import com.example.backend.model.SearchTermFrequency;
 import com.example.backend.model.StorageList;
 import com.example.backend.services.SpellCheck;
+import com.example.backend.services.FrequencyCounter;
 import com.example.backend.services.Search;
 import com.example.backend.services.SearchFrequency;
 
@@ -24,14 +25,15 @@ import com.example.backend.services.SearchFrequency;
 public class Controller {
     private static final Search search = new Search();
     private static final SpellCheck spellCheck = new SpellCheck();
-    private static final SearchFrequency searchFrequency = new SearchFrequency();
-    private static final String searchHistoryPath = "./data/searchHistory.txt";
+    private static final SearchFrequency searchFrequency = new SearchFrequency("./data");
+    private static final FrequencyCounter frequencyCounter = new FrequencyCounter();
 
     @PostConstruct
     public void init() {
         // Initialize the search and build the Trie
         search.buildTrie();
         spellCheck.buildDictionary();
+        searchFrequency.init();
     }
 
     private static final String template = "Hello, %s!";
@@ -60,7 +62,17 @@ public class Controller {
 
     @GetMapping("/search_history")
     public SearchHistory searchHistory() {
-        return new SearchHistory(searchFrequency.getList(searchHistoryPath));
+        return new SearchHistory(searchFrequency.getSearchHistory());
+    }
+
+    @GetMapping("/search_history_term_freq")
+    public SearchTermFrequency searchHistoryTermFrequency(@RequestParam(value = "q", defaultValue = "") String term) {
+        return new SearchTermFrequency(searchFrequency.searchWord(term));
+    }
+
+    @GetMapping("/frequency_counter")
+    public WordFrequency wordFrequency() {
+        return new WordFrequency(frequencyCounter.init("./data"));
     }
 
     @GetMapping("/search")
@@ -90,7 +102,7 @@ public class Controller {
         // Handle general query
         if (!query.isEmpty()) {
             searchResultIndex = search.invertedIndex.search(query);
-            searchFrequency.addHistory(searchHistoryPath, query);
+            searchFrequency.addHistory(query);
             System.out.println(searchResultIndex.entrySet().isEmpty());
             if (searchResultIndex.entrySet().isEmpty()) {
                 string = spellCheck.findClosestWord(query);
