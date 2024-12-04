@@ -1,7 +1,6 @@
 package com.example.backend;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import jakarta.annotation.PostConstruct;
 
@@ -10,14 +9,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.model.AutoComplete;
-import com.example.backend.model.Greeting;
 import com.example.backend.model.PatternMatchModel;
 import com.example.backend.model.SearchHistory;
 import com.example.backend.model.WordFrequency;
 import com.example.backend.model.SearchQuery;
 import com.example.backend.model.SearchTermFrequency;
 import com.example.backend.model.StorageList;
+import com.example.backend.model.ValidateData;
 import com.example.backend.services.SpellCheck;
+import com.example.backend.services.DataValidation;
 import com.example.backend.services.FrequencyCounter;
 import com.example.backend.services.PatternMatch;
 import com.example.backend.services.Search;
@@ -30,6 +30,7 @@ public class Controller {
     private static final SearchFrequency searchFrequency = new SearchFrequency("./data");
     private static final FrequencyCounter frequencyCounter = new FrequencyCounter();
     private static final PatternMatch patternMatch = new PatternMatch();
+    private static final DataValidation dv = new DataValidation();
 
     @PostConstruct
     public void init() {
@@ -37,6 +38,7 @@ public class Controller {
         search.buildTrie();
         spellCheck.buildDictionary();
         searchFrequency.init();
+        dv.init("./data");
     }
 
     @GetMapping("/auto_complete")
@@ -73,6 +75,13 @@ public class Controller {
     @GetMapping("/subscribe_to_newsletter")
     public PatternMatchModel subscribe(@RequestParam(value = "email", defaultValue = "") String email) {
         return new PatternMatchModel(patternMatch.emailCheck(email));
+    }
+
+    @GetMapping("/validate_data")
+    public ValidateData validateData() {
+        System.out.println("Data");
+        dv.printInvalidLines();
+        return new ValidateData(dv.invalidLinesByFile);
     }
 
     @GetMapping("/search")

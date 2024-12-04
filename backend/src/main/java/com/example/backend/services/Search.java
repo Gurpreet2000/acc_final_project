@@ -21,6 +21,7 @@ public class Search {
 
         try {
             FileUtils.readFiles("./data", path -> {
+                System.out.println("Reading file: " + path.toString());
                 try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(path.toString())).build()) {
                     String documentId = path.toString();
 

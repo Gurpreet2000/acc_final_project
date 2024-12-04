@@ -17,17 +17,18 @@ public class DataValidation {
     private final String PRICE_PER_ANNUM_PATTERN = "^(0|[1-9]\\d*)(\\.\\d{2})?$";
 
     // Map to store invalid lines by filename
-    private Map<String, List<String>> invalidLinesByFile = new HashMap<>();
+    public Map<String, List<String>> invalidLinesByFile = new HashMap<>();
 
     public static void main(String[] args) {
         DataValidation dv = new DataValidation();
-        dv.init();
-        dv.printInvalidLines();
+        dv.init("./backend/data");
     }
 
-    public void init() {
+    public void init(String directory) {
+        System.out.println("Init Data Validation");
+
         invalidLinesByFile.clear(); // Clear previous results
-        FileUtils.readFiles("./backend/data", path -> {
+        FileUtils.readFiles(directory, path -> {
             validate(path.toString());
         });
     }
