@@ -6,6 +6,7 @@ import NavBar from './components/NavBar';
 import FrequencyCount from './screens/FrequencyCount';
 import History from './screens/History';
 import { Toaster } from './components/ui/toaster';
+import DataScraper from './screens/DataScraper';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/frequency" element={<FrequencyCount />} />
           <Route path="/search_history" element={<History />} />
+          <Route path="/data_scraper" element={<DataScraper />} />
         </Routes>
         <Toaster />
       </BrowserRouter>

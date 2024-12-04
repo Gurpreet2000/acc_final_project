@@ -30,6 +30,11 @@ const NavBar = () => {
             Frequency Count
           </NavigationMenuLink>
         </Link>
+        {/* <Link to="/data_scraper">
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            Data Scraper
+          </NavigationMenuLink>
+        </Link> */}
       </NavigationMenuList>
     </NavigationMenu>
   );

@@ -116,23 +116,26 @@ const Search = () => {
           </div>
         </TabsContent>
       </Tabs>
+      {!!spellCheck && (
+        <div className="mb-3">
+          Do you mean:{' '}
+          <a
+            className="underline cursor-pointer"
+            onClick={() => {
+              setSearchTerm(spellCheck);
+              onSearch(spellCheck);
+            }}
+          >
+            {spellCheck}
+          </a>
+          ?
+        </div>
+      )}
+      {currentTab === 'filter' && !!list?.length && (
+        <div className="mb-3 text-3xl font-bold">Our Recommendations:</div>
+      )}
       <Separator orientation="horizontal" className="my-3" />
       <div className="flex flex-col flex-1 align-middle mx-[10%]">
-        {!!spellCheck && (
-          <div className="mb-3">
-            Do you mean:{' '}
-            <a
-              className="underline cursor-pointer"
-              onClick={() => {
-                setSearchTerm(spellCheck);
-                onSearch(spellCheck);
-              }}
-            >
-              {spellCheck}
-            </a>
-            ?
-          </div>
-        )}
         <PlanList data={list} />
       </div>
     </div>
