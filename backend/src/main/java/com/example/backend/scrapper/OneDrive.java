@@ -10,12 +10,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OneDrive {
 
         private static final String MICROSOFT = "Microsoft";
 
         public static void main(String[] args) {
+                OneDrive scraper = new OneDrive();
+                scraper.init("./temp");
+        }
+
+        public void init(String directory) {
 
                 // Initialize WebDriver
                 WebDriver driver = new ChromeDriver();
@@ -42,16 +49,17 @@ public class OneDrive {
                 cloudService.setCapacity(baharKaContainer.findElement(By.cssSelector(".card-body"))
                                 .findElement(By.xpath("//*[@id=\"custom-list-item-oce04e\"]/div/p/span")).getText());
                 cloudService.setSpecialFeatures(
-                                (baharKaContainer
+                                "\"- " + (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oca298\"]/div/p/span"))
-                                                .getText()));
+                                                .getText()) + "\"");
                 cloudService.setPlatformCompatibility(
                                 (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc4ada\"]/div/p/span"))
                                                 .getText()));
 
+                cloudService.setUrl(driver.getCurrentUrl());
                 cloudServices.add(cloudService);
 
                 CloudService cloudService1 = new CloudService();
@@ -66,16 +74,17 @@ public class OneDrive {
                 cloudService1.setCapacity(baharKaContainer.findElement(By.cssSelector(".card-body"))
                                 .findElement(By.xpath("//*[@id=\"custom-list-item-ocda3c\"]/div/p/span")).getText());
                 cloudService1.setSpecialFeatures(
-                                (baharKaContainer
+                                "\"- " + (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oca298\"]/div/p/span"))
-                                                .getText()));
+                                                .getText()) + "\"");
                 cloudService1.setPlatformCompatibility(
                                 (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc4ada\"]/div/p/span"))
                                                 .getText()));
 
+                cloudService1.setUrl(driver.getCurrentUrl());
                 cloudServices.add(cloudService1);
 
                 CloudService cloudService2 = new CloudService();
@@ -90,16 +99,17 @@ public class OneDrive {
                 cloudService2.setCapacity(baharKaContainer.findElement(By.cssSelector(".card-body"))
                                 .findElement(By.xpath("//*[@id=\"custom-list-item-oc147e\"]/div/p/span")).getText());
                 cloudService2.setSpecialFeatures(
-                                (baharKaContainer
+                                "\"- " + (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc26f8\"]/div/p/span"))
-                                                .getText()));
+                                                .getText()) + "\"");
                 cloudService2.setPlatformCompatibility(
                                 (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc4ada\"]/div/p/span"))
                                                 .getText()));
 
+                cloudService2.setUrl(driver.getCurrentUrl());
                 cloudServices.add(cloudService2);
 
                 CloudService cloudService3 = new CloudService();
@@ -116,30 +126,28 @@ public class OneDrive {
                 cloudService3.setCapacity(baharKaContainer.findElement(By.cssSelector(".card-body"))
                                 .findElement(By.xpath("//*[@id=\"custom-list-item-oc5bb0\"]/div/p/span")).getText());
                 cloudService3.setSpecialFeatures(
-                                (baharKaContainer
+                                "\"- " + (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc2279\"]/div/p/span"))
-                                                .getText()));
+                                                .getText()) + "\"");
                 cloudService3.setPlatformCompatibility(
                                 (baharKaContainer
                                                 .findElement(By.xpath(
                                                                 "//*[@id=\"custom-list-item-oc0e28\"]/div/p/span"))
                                                 .getText()));
 
+                cloudService3.setUrl(driver.getCurrentUrl());
                 cloudServices.add(cloudService3);
-                // Add other plans similarly here...
-                // cloudServices.add(cloudService1);
-                // cloudServices.add(cloudService2);
 
                 // Write the data to a CSV file
-                writeToCsv(cloudServices, "./temp");
+                writeToCsv(cloudServices, directory);
 
                 // Close the driver
                 driver.quit();
         }
 
         private static void writeToCsv(List<CloudService> cloudServices, String directory) {
-                String path = directory + "/icloud_plans.csv";
+                String path = directory + "/oneDrive.csv";
                 // Prepare the CSV file
                 File file = new File(path);
                 file.getParentFile().mkdirs();
@@ -147,7 +155,7 @@ public class OneDrive {
                 try (FileWriter csvWriter = new FileWriter(path)) {
                         // Write the CSV headers
                         csvWriter.append(
-                                        "Provider,Plan Name,Price Per Annum,Price Per Month,Capacity,Special Features,Platform Compatibility\n");
+                                        "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
 
                         // Write each CloudService object to the CSV
                         for (CloudService service : cloudServices) {
@@ -156,8 +164,11 @@ public class OneDrive {
                                 csvWriter.append(service.getPricePerAnnum()).append(",");
                                 csvWriter.append(service.getPricePerMonth()).append(",");
                                 csvWriter.append(service.getCapacity()).append(",");
+                                csvWriter.append(",");
                                 csvWriter.append(service.getSpecialFeatures()).append(",");
-                                csvWriter.append(service.getPlatformCompatibility()).append("\n");
+                                csvWriter.append(service.getPlatformCompatibility()).append(",");
+                                csvWriter.append(service.getUrl()).append(",");
+                                csvWriter.append(",\n");
                         }
 
                         System.out.println("Data successfully written to CloudServices.csv");
@@ -176,6 +187,7 @@ class CloudService {
         private String fileTypesSupported;
         private String specialFeatures;
         private String platformCompatibility;
+        private String url;
 
         public String getProvider() {
                 return provider;
@@ -214,7 +226,15 @@ class CloudService {
         }
 
         public void setCapacity(String capacity) {
-                this.capacity = capacity;
+                // Regular expression to match storage sizes (e.g., "1 GB", "1 TB")
+                Pattern pattern = Pattern.compile("(\\d+\\s?(GB|TB))");
+                Matcher matcher = pattern.matcher(capacity);
+
+                if (matcher.find()) {
+                        this.capacity = matcher.group(1); // Extract the matched storage size
+                } else {
+                        this.capacity = ""; // Fallback value if no match is found
+                }
         }
 
         public String getSpecialFeatures() {
@@ -226,7 +246,16 @@ class CloudService {
         }
 
         public String getPlatformCompatibility() {
-                return platformCompatibility;
+                return "\"- " + platformCompatibility.replace("Works on ", "").replace(",", "\n- ").replace("and ",
+                                "") + "\"";
+        }
+
+        public void setUrl(String url) {
+                this.url = url;
+        }
+
+        public String getUrl() {
+                return url;
         }
 
         public void setPlatformCompatibility(String platformCompatibility) {

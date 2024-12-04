@@ -31,7 +31,7 @@ public class Icloud {
 
             FileWriter csvWriter = new FileWriter(path);
             csvWriter.append(
-                    "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Platform compatibility,URL,Contact Email,Contact Number,Special features\n");
+                    "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
 
             // Navigate to the iCloud page
             driver.get("https://www.apple.com/ca/icloud/");
@@ -79,8 +79,8 @@ public class Icloud {
 
                 // Add data to the CSV
                 csvWriter.append(String.format(
-                        "iCloud,%s,,%s,%s,all,all,%s,,,%s\n",
-                        planName, pricePerMonth, capacity, planURL, specialFeatures));
+                        "iCloud,%s,,%s,%s,,%s,,%s,,\n",
+                        planName, pricePerMonth, capacity, specialFeatures, planURL));
             }
 
             csvWriter.flush();

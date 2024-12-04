@@ -30,7 +30,7 @@ public class Dropbox {
             // Prepare CSV file for writing
             FileWriter csvWriter = new FileWriter(filePath);
             csvWriter.append(
-                    "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Platform compatibility,URL,Contact Email,Contact Number,Special features\n");
+                    "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
 
             // Extract yearly plan details
             driver.get("https://www.dropbox.com/plans?billing=yearly");
@@ -114,13 +114,13 @@ public class Dropbox {
             // Write all data to the CSV file
             for (int i = 0; i < planNames.length; i++) {
                 csvWriter.append(String.format(
-                        "Dropbox,%s,%s,%s,%s,,,%s,,%s\n",
+                        "Dropbox,%s,%s,%s,%s,,%s,,%s,,\n",
                         planNames[i],
                         yearlyPricesArray[i],
                         (i < monthlyPricesArray.length) ? monthlyPricesArray[i] : "null",
                         (i < capacities.length) ? capacities[i] : "null",
-                        url, // Add URL in the correct column position (8th column)
-                        specialFeatures[i] // Add Special Features in the correct column position (11th column)
+                        specialFeatures[i], // Add Special Features in the correct column position (11th column)
+                        url// Add URL in the correct column position (8th column)
                 ));
             }
 

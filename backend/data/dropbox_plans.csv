@@ -1,5 +1,8 @@
-Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Platform compatibility,URL,Contact Email,Contact Number,Special features
-Dropbox,Plus,12.99,15.99,2 TB,all,all,https://www.dropbox.com/plans,,,Transfer files up to 50 GB - Edit PDFs and get signatures
-Dropbox,Essentials,23.25,27.99,3 TB,all,all,https://www.dropbox.com/plans,,,Transfer files up to 100 GB - Edit PDFs and get signatures
-Dropbox,Business,21,25,9 TB,all,all,https://www.dropbox.com/plans,,,3+ users - Admin-managed file access
-Dropbox,Business Plus,33,39.50,15 TB,all,all,https://www.dropbox.com/plans,,,Transfer files up to 250 GB - End-to-end encryption
+Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number
+Dropbox,Plus,12.99,15.99,null,,null,,https://www.dropbox.com/plans?billing=monthly,,
+Dropbox,Essentials,23.25,27.99,3 TB,,"- Transfer files up to 100 GB
+- 180 days to restore deleted files",,https://www.dropbox.com/plans?billing=monthly,,
+Dropbox,Business,21,25,9 TB,,"- Transfer files up to 100 GB
+- 180 days to restore deleted files",,https://www.dropbox.com/plans?billing=monthly,,
+Dropbox,Business Plus,33,39.50,15 TB,,"- Transfer files up to 250 GB
+- 1 year to restore deleted files",,https://www.dropbox.com/plans?billing=monthly,,

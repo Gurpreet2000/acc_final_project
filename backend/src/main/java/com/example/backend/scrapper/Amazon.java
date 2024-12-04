@@ -36,7 +36,7 @@ public class Amazon {
         try (FileWriter csvWriter = new FileWriter(path)) {
             // Write the required CSV headers
             csvWriter.append(
-                    "Provider,Plan Name,Yearly Price,Monthly Price,Capacity,Types Supported,Special Features,Platform Compatibility,URL,Contact Name,Contact Email\n");
+                    "Provider,Plan Name,Price per annum,Price per month,Capacity,File types supported,Special features,Platform compatibility,URL,Contact Email,Contact Number\n");
 
             // Step 1: Open the Amazon S3 page and get the Provider Name
             driver.get("https://aws.amazon.com/s3/");
