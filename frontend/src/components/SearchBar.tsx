@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Command,
   CommandEmpty,
@@ -21,7 +21,7 @@ export type SearchBarProps = {
 const SearchBar = ({
   data = [],
   value = '',
-  setValue = (value = '') => {},
+  setValue,
   onSearch = () => {},
   showSuggestions = false,
   setShowSuggestions = () => {},

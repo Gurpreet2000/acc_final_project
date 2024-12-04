@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.model.AutoComplete;
 import com.example.backend.model.Greeting;
+import com.example.backend.model.PatternMatchModel;
 import com.example.backend.model.SearchHistory;
 import com.example.backend.model.WordFrequency;
 import com.example.backend.model.SearchQuery;
@@ -18,6 +19,7 @@ import com.example.backend.model.SearchTermFrequency;
 import com.example.backend.model.StorageList;
 import com.example.backend.services.SpellCheck;
 import com.example.backend.services.FrequencyCounter;
+import com.example.backend.services.PatternMatch;
 import com.example.backend.services.Search;
 import com.example.backend.services.SearchFrequency;
 
@@ -27,6 +29,7 @@ public class Controller {
     private static final SpellCheck spellCheck = new SpellCheck();
     private static final SearchFrequency searchFrequency = new SearchFrequency("./data");
     private static final FrequencyCounter frequencyCounter = new FrequencyCounter();
+    private static final PatternMatch patternMatch = new PatternMatch();
 
     @PostConstruct
     public void init() {
@@ -34,14 +37,6 @@ public class Controller {
         search.buildTrie();
         spellCheck.buildDictionary();
         searchFrequency.init();
-    }
-
-    private static final String template = "Hello, %s!";
-    private final AtomicLong counter = new AtomicLong();
-
-    @GetMapping("/greeting")
-    public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
-        return new Greeting(counter.incrementAndGet(), String.format(template, name));
     }
 
     @GetMapping("/auto_complete")
@@ -73,6 +68,11 @@ public class Controller {
     @GetMapping("/frequency_counter")
     public WordFrequency wordFrequency() {
         return new WordFrequency(frequencyCounter.init("./data"));
+    }
+
+    @GetMapping("/subscribe_to_newsletter")
+    public PatternMatchModel subscribe(@RequestParam(value = "email", defaultValue = "") String email) {
+        return new PatternMatchModel(patternMatch.emailCheck(email));
     }
 
     @GetMapping("/search")

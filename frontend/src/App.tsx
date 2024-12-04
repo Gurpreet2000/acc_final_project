@@ -5,6 +5,7 @@ import Home from './screens/Home';
 import NavBar from './components/NavBar';
 import FrequencyCount from './screens/FrequencyCount';
 import History from './screens/History';
+import { Toaster } from './components/ui/toaster';
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/frequency" element={<FrequencyCount />} />
           <Route path="/search_history" element={<History />} />
         </Routes>
+        <Toaster />
       </BrowserRouter>
     </ThemeProvider>
   );
