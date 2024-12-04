@@ -1,4 +1,3 @@
-// Use: Regex
 package com.example.backend.services;
 
 import java.io.*;
@@ -11,26 +10,32 @@ import java.nio.file.*;
 
 public class DataValidation {
 
-    // Updated Validation Patterns
+    // Validation Patterns
     private final String URL_PATTERN = "^https?://[\\w.-]+(/\\S*)?$";
     private final String CAPACITY_PATTERN = "^\\d+\\s?(GB|TB)$";
-    private final String PRICE_PATTERN = "^\\$?\\d+(\\.\\d{2})?$";
+    private final String PRICE_PER_MONTH_PATTERN = "^(0|[1-9]\\d*)(\\.\\d{2})?$";
+    private final String PRICE_PER_ANNUM_PATTERN = "^(0|[1-9]\\d*)(\\.\\d{2})?$";
+
+    // Map to store invalid lines by filename
+    private Map<String, List<String>> invalidLinesByFile = new HashMap<>();
 
     public static void main(String[] args) {
         DataValidation dv = new DataValidation();
         dv.init();
+        dv.printInvalidLines();
     }
 
     public void init() {
-        FileUtils.readFiles("./data", path -> {
+        invalidLinesByFile.clear(); // Clear previous results
+        FileUtils.readFiles("./backend/data", path -> {
             validate(path.toString());
         });
     }
 
     public void validate(String filePath) {
-        System.out.println("path: " + filePath);
-        List<String[]> validEntries = new ArrayList<>();
-        List<String[]> invalidEntries = new ArrayList<>();
+        System.out.println("Validating path: " + filePath);
+        String fileName = Paths.get(filePath).getFileName().toString();
+        List<String> fileInvalidLines = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(Paths.get(filePath))) {
             String header = br.readLine(); // Skip the header
@@ -39,53 +44,61 @@ public class DataValidation {
                 return;
             }
 
+            int lineNumber = 1; // Start from line 1 (after header)
             String line;
             while ((line = br.readLine()) != null) {
+                lineNumber++;
                 String[] fields = line.split(",", -1); // Split, including empty fields
                 if (fields.length < 8) { // Ensure sufficient fields
-                    invalidEntries.add(new String[] { "Invalid Row" });
+                    fileInvalidLines.add("Line " + lineNumber + ": Insufficient fields - " + line);
                     continue;
                 }
 
+                // Specific column validations
                 String url = fields[7].trim();
                 String capacity = fields[4].trim().replaceAll("\\s+", " ");
-                String price = fields[2].trim();
+                String pricePerMonth = fields[2].trim().replaceAll("\\$", "");
+                String pricePerAnnum = fields[3].trim().replaceAll("\\$", "");
 
-                // Validate fields
+                // Validate specific fields
                 boolean isValid = validateField(url, URL_PATTERN) &&
                         validateField(capacity, CAPACITY_PATTERN) &&
-                        validateField(price, PRICE_PATTERN);
+                        validateField(pricePerMonth, PRICE_PER_MONTH_PATTERN) &&
+                        validateField(pricePerAnnum, PRICE_PER_ANNUM_PATTERN);
 
-                if (isValid) {
-                    validEntries.add(new String[] { url, capacity, price });
-                } else {
-                    invalidEntries.add(new String[] { url, capacity, price });
+                if (!isValid) {
+                    fileInvalidLines.add("Line " + lineNumber + ": " + line);
                 }
             }
 
-            // Print validation results
-            printResults("Valid Entries", validEntries);
-            printResults("Invalid Entries", invalidEntries);
+            // If there are invalid lines for this file, add to the map
+            if (!fileInvalidLines.isEmpty()) {
+                invalidLinesByFile.put(fileName, fileInvalidLines);
+            }
 
         } catch (IOException e) {
             System.err.println("Error reading the file: " + e.getMessage());
         }
     }
 
-    private static boolean validateField(String field, String pattern) {
-        return Pattern.matches(pattern, field);
+    // Method to print invalid lines
+    public void printInvalidLines() {
+        System.out.println("\n=== Invalid Lines by File ===");
+        if (invalidLinesByFile.isEmpty()) {
+            System.out.println("No invalid lines found.");
+            return;
+        }
+
+        for (Map.Entry<String, List<String>> entry : invalidLinesByFile.entrySet()) {
+            System.out.println(entry.getKey() + ":");
+            for (String invalidLine : entry.getValue()) {
+                System.out.println("  " + invalidLine);
+            }
+            System.out.println(); // Empty line between files
+        }
     }
 
-    private static void printResults(String title, List<String[]> entries) {
-        System.out.println("\n=== " + title + " ===");
-        if (entries.isEmpty()) {
-            System.out.println("No entries found.");
-        } else {
-            System.out.printf("%-50s | %-10s | %-10s\n", "URL", "Capacity", "Price");
-            System.out.println("------------------------------------------------------------");
-            for (String[] entry : entries) {
-                System.out.printf("%s\n", entry);
-            }
-        }
+    private static boolean validateField(String field, String pattern) {
+        return Pattern.matches(pattern, field);
     }
 }
